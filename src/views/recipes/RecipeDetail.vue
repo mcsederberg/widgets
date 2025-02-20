@@ -1,5 +1,7 @@
 <template>
   <div class="recipe-detail">
+    <!-- metric imperial toggle -->
+    <!-- <button @click="toggleMetric">Toggle Metric/Imperial</button> -->
     <h2>{{ recipe?.title || "Loading..." }}</h2>
     <p><strong>Contributor:</strong> {{ recipe?.contributor || "Unknown" }}</p>
 
@@ -27,6 +29,10 @@ import { ref, onMounted } from "vue";
 import { useRoute } from "vue-router";
 import { getFirestore, doc, getDoc } from "firebase/firestore";
 
+// import { convertToMetric, convertToImperial } from "@/utils/converters";
+import { useRecipesStore } from "@/stores/recipesStore";
+import { storeToRefs } from "pinia";
+
 export default {
   name: "RecipeDetail",
   setup() {
@@ -34,6 +40,13 @@ export default {
     const recipe = ref(null);
     const loading = ref(true);
     const db = getFirestore();
+
+    const recipesStore = useRecipesStore();
+    const { useImperial } = storeToRefs(recipesStore);
+
+    const toggleMetric = () => {
+      recipesStore.toggleUseImperial();
+    };
 
     const fetchRecipe = async () => {
       const recipeId = route.params.id;
@@ -55,7 +68,12 @@ export default {
 
     onMounted(fetchRecipe);
 
-    return { recipe, loading };
+    return {
+      recipe, 
+      toggleMetric,
+      loading,
+      useImperial,
+    };
   },
 };
 </script>

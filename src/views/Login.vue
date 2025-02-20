@@ -23,12 +23,16 @@ import {
   GoogleAuthProvider,
 } from "firebase/auth";
 
+import { useRouter } from "vue-router";
+
 export default {
   name: "Auth",
   setup() {
     const email = ref("");
     const password = ref("");
     const isLogin = ref(true);
+
+    const router = useRouter();
 
     const handleAuth = async () => {
       try {
@@ -39,6 +43,8 @@ export default {
           await createUserWithEmailAndPassword(auth, email.value, password.value);
           alert("Account created!");
         }
+        // route to /recipes
+        router.push("/recipes");
       } catch (error) {
         console.error("Auth error:", error.message);
       }
@@ -49,6 +55,7 @@ export default {
         const provider = new GoogleAuthProvider();
         await signInWithPopup(auth, provider);
         alert("Logged in with Google!");
+        router.push("/recipes");
       } catch (error) {
         console.error("Google sign-in error:", error.message);
       }

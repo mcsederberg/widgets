@@ -21,7 +21,7 @@ export default {
     const route = useRoute();
 
     const widgets = ref([
-      { id: 1, name: 'Message Template', url: '/messagetemplate' },
+      { id: 1, name: 'Recipes', url: '/recipes' },
     ]);
     return {
       widgets,
