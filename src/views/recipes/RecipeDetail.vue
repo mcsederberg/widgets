@@ -1,7 +1,5 @@
 <template>
   <div class="recipe-detail">
-    <!-- metric imperial toggle -->
-    <!-- <button @click="toggleMetric">Toggle Metric/Imperial</button> -->
     <h2>{{ recipe?.title || "Loading..." }}</h2>
     <p><strong>Contributor:</strong> {{ recipe?.contributor || "Unknown" }}</p>
 
@@ -11,13 +9,18 @@
       <h3>Ingredients:</h3>
       <ul>
         <li v-for="(ingredient, index) in recipe.ingredients" :key="index">
-          {{ ingredient }}
+          <input type="checkbox" v-model="checkedIngredients[index]" />
+          <span :class="{ checked: checkedIngredients[index] }">{{ ingredient }}</span>
         </li>
       </ul>
 
       <h3>Instructions:</h3>
-      <p v-if="recipe.instructions">{{ recipe.instructions }}</p>
-      <p v-else>No instructions provided.</p>
+      <ul>
+        <li v-for="(step, index) in formattedInstructions" :key="index">
+          <input type="checkbox" v-model="checkedInstructions[index]" />
+          <span :class="{ checked: checkedInstructions[index] }">{{ step }}</span>
+        </li>
+      </ul>
     </div>
 
     <router-link to="/recipes">Back to Recipes</router-link>
@@ -25,11 +28,9 @@
 </template>
 
 <script>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed } from "vue";
 import { useRoute } from "vue-router";
 import { getFirestore, doc, getDoc } from "firebase/firestore";
-
-// import { convertToMetric, convertToImperial } from "@/utils/converters";
 import { useRecipesStore } from "@/stores/recipesStore";
 import { storeToRefs } from "pinia";
 
@@ -40,13 +41,11 @@ export default {
     const recipe = ref(null);
     const loading = ref(true);
     const db = getFirestore();
+    const checkedIngredients = ref([]);
+    const checkedInstructions = ref([]);
 
     const recipesStore = useRecipesStore();
     const { useImperial } = storeToRefs(recipesStore);
-
-    const toggleMetric = () => {
-      recipesStore.toggleUseImperial();
-    };
 
     const fetchRecipe = async () => {
       const recipeId = route.params.id;
@@ -56,6 +55,8 @@ export default {
 
         if (docSnap.exists()) {
           recipe.value = docSnap.data();
+          checkedIngredients.value = new Array(recipe.value.ingredients.length).fill(false);
+          checkedInstructions.value = new Array(recipe.value.instructions.split("\n").length).fill(false);
         } else {
           recipe.value = null;
         }
@@ -66,13 +67,19 @@ export default {
       }
     };
 
+    const formattedInstructions = computed(() => {
+      return recipe.value?.instructions ? recipe.value.instructions.split("\n").filter(line => line.trim()) : [];
+    });
+
     onMounted(fetchRecipe);
 
     return {
-      recipe, 
-      toggleMetric,
+      recipe,
       loading,
       useImperial,
+      checkedIngredients,
+      checkedInstructions,
+      formattedInstructions,
     };
   },
 };
@@ -97,6 +104,17 @@ ul {
 
 li {
   padding: 5px 0;
+  display: flex;
+  align-items: center;
+}
+
+input[type="checkbox"] {
+  margin-right: 10px;
+}
+
+.checked {
+  text-decoration: line-through;
+  color: gray;
 }
 
 p {
