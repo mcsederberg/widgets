@@ -5,31 +5,32 @@
       <div>
         <label for="title">Title:</label>
         <input type="text" id="title" v-model="title" required />
-      </div>
-
-      <div>
-        <label for="contributor">Contributor Name:</label>
-        <input type="text" id="contributor" v-model="contributor" required />
-      </div>
-
-      <div>
-        <label for="ingredients">Ingredients:</label>
-        <textarea id="ingredients" v-model="ingredients" placeholder="One ingredient per line" required></textarea>
-      </div>
-
-      <div>
-        <label for="instructions">Instructions:</label>
-        <textarea id="instructions" v-model="instructions" placeholder="Step-by-step instructions" required></textarea>
-      </div>
-
-      <button type="submit" :disabled="loading">
-        {{ loading ? "Saving..." : "Add Recipe" }}
-      </button>
-    </form>
+      </div><div>
+    <label for="contributor">Contributor Name:</label>
+    <input type="text" id="contributor" v-model="contributor" required />
   </div>
-</template>
 
-<script>
+  <div class="textarea-container">
+    <label for="ingredients">Ingredients:</label>
+    <button type="button" class="scroll-btn up" @click="scrollTextarea('ingredients', -1)">&uarr;</button>
+    <textarea id="ingredients" v-model="ingredients" placeholder="One ingredient per line" required></textarea>
+    <button type="button" class="scroll-btn down" @click="scrollTextarea('ingredients', 1)">&darr;</button>
+  </div>
+
+  <div class="textarea-container">
+    <label for="instructions">Instructions:</label>
+    <button type="button" class="scroll-btn up" @click="scrollTextarea('instructions', -1)">&uarr;</button>
+    <textarea id="instructions" v-model="instructions" placeholder="Step-by-step instructions" required></textarea>
+    <button type="button" class="scroll-btn down" @click="scrollTextarea('instructions', 1)">&darr;</button>
+  </div>
+
+  <button type="submit" :disabled="loading">
+    {{ loading ? "Saving..." : "Add Recipe" }}
+  </button>
+</form>
+
+  </div>
+</template><script>
 import { ref } from "vue";
 import { getFirestore, collection, addDoc } from "firebase/firestore";
 
@@ -68,12 +69,17 @@ export default {
       }
     };
 
-    return { title, contributor, ingredients, instructions, loading, addRecipe };
+    const scrollTextarea = (id, direction) => {
+      const textarea = document.getElementById(id);
+      if (textarea) {
+        textarea.scrollTop += direction * 20;
+      }
+    };
+
+    return { title, contributor, ingredients, instructions, loading, addRecipe, scrollTextarea };
   },
 };
-</script>
-
-<style scoped>
+</script><style scoped>
 .recipe-create {
   max-width: 400px;
   margin: auto;
@@ -99,6 +105,39 @@ textarea {
   padding: 8px;
   border: 1px solid #ccc;
   border-radius: 5px;
+}
+
+textarea {
+  min-height: 10em;
+  resize: vertical;
+}
+
+.textarea-container {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.scroll-btn {
+  position: absolute;
+  right: -30px;
+  width: 30px;
+  height: 30px;
+  border: none;
+  background: #ccc;
+  cursor: pointer;
+  font-size: 1.2em;
+  line-height: 1;
+  text-align: center;
+}
+
+.up {
+  top: 0;
+}
+
+.down {
+  bottom: 0;
 }
 
 button {
