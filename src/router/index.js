@@ -2,11 +2,15 @@ import { createRouter, createWebHistory } from "vue-router";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import Home from "@/views/Home.vue";
 import MessageTemplate from "@/views/MessageTemplate.vue";
+
 import Recipes from "@/views/Recipes.vue";
 import RecipeList from "@/views/recipes/RecipeList.vue";
 import RecipeDetail from "@/views/recipes/RecipeDetail.vue";
 import RecipeCreate from "@/views/recipes/RecipeCreate.vue";
+
 import Login from "@/views/Login.vue";
+
+import PricesList from "@/views/prices/PricesList.vue";
 
 const requireAuth = (to, from, next) => {
   const auth = getAuth();
@@ -57,6 +61,14 @@ const routes = [
       },
     ],
   },
+  {
+    path: "/prices",
+    component: PricesList,
+    beforeEnter: requireAuth,
+    children: [
+      
+    ]
+  }
 ];
 
 const router = createRouter({
