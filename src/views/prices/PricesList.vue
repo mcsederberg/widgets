@@ -20,7 +20,7 @@
     </div>
 
     <div class="card-container">
-      <div v-for="price in filteredPrices" :key="price.id" class="price-card" @click="openModal(price)">
+      <div v-for="price in filteredPrices" :key="price.id" class="price-card" @click="openDeleteModal(price.name)">
         <h3>{{ price.name }}</h3>
         <p><strong>Categoría:</strong> {{ price.category }}</p>
         <p><strong>Tienda:</strong> {{ price.store }}</p>
@@ -28,21 +28,65 @@
         <p><strong>Precio:</strong> ${{ price.price }}</p>
         <p><strong>Cantidad:</strong> {{ price.quantity }} {{ price.unit }}</p>
         <button @click.stop="deletePrice(price.id)" class="btn-delete">Eliminar</button>
+        <button @click.stop="openModifyModal(price)" class="btn-secondary">Modificar</button>
       </div>
     </div>
 
-    <div v-if="showModal" class="modal-overlay" @click="closeModal">
+    <div v-if="showDeleteModal" class="modal-overlay" @click="closeDeleteModal">
       <div class="modal" @click.stop>
-        <h3>Detalles de {{ selectedPrice?.name }}</h3>
-        <p><strong>Categoría:</strong> {{ selectedPrice?.category }}</p>
-        <p><strong>Tienda:</strong> {{ selectedPrice?.store }}</p>
-        <p><strong>Marca:</strong> {{ selectedPrice?.brand }}</p>
-        <p><strong>Precio:</strong> ${{ selectedPrice?.price }}</p>
-        <p><strong>Cantidad:</strong> {{ selectedPrice?.quantity }} {{ selectedPrice?.unit }}</p>
-        <button @click="closeModal" class="btn-secondary">Cerrar</button>
+        <h3>Comparación de {{ selectedProductName }}</h3>
+        <p v-for="product in comparedPrices" :key="product.id">
+          <strong>{{ product.store }} ({{ product.brand }}):</strong>
+          ${{ product.price }} por {{ product.quantity }} {{ product.unit }}
+          <br>
+          (Unidad base: ${{ product.comparablePrice.toFixed(2) }} por 1g/ml)
+        </p>
+        <div class="horizontalLine"></div>
+        <p><strong>Mejor Precio:</strong> {{ bestPrice?.store }} - ${{ bestPrice?.originalPrice }} por {{
+          bestPrice?.originalQuantity }} {{ bestPrice?.originalUnit }}</p>
+        <button @click="closeDeleteModal" class="btn-secondary">Cerrar</button>
       </div>
     </div>
 
+    <div v-if="showEditModal" class="modal-overlay" @click="closeEditModal">
+      <div class="modal" @click.stop>
+        <h3>Modificar Precio de {{ selectedProduct.name }}</h3>
+        <form @submit.prevent="modifyPrice(selectedProduct.id)">
+          <label>Nombre:
+            <input v-model="selectedProduct.name" required />
+          </label>
+          <label>Categoría:
+            <select v-model="selectedProduct.category" required>
+              <option v-for="cat in categories" :key="cat" :value="cat">{{ cat }}</option>
+            </select>
+          </label>
+          <label>Tienda:
+            <input type="text" v-model="selectedProduct.store" list="store-list" required />
+            <datalist id="store-list">
+              <option v-for="store in stores" :key="store" :value="store" />
+            </datalist>
+          </label>
+          <label>Marca:
+            <input type="text" v-model="selectedProduct.brand" />
+          </label>
+          <label>Precio:
+            <input type="number" v-model.number="selectedProduct.price" required />
+          </label>
+          <label>Cantidad:
+            <input type="number" v-model.number="selectedProduct.quantity" required class="quantityInput" />
+            <select v-model="selectedProduct.unit">
+              <option v-for="option in units" :key="option" :value="option">{{ option }}</option>
+            </select>
+          </label>
+          <label>Fecha (opcional):
+            <input type="date" v-model="selectedProduct.date" />
+          </label>
+          <button type="submit">Guardar</button>
+          <button type="button" @click="closeEditModal">Cancelar</button>
+        </form>
+
+      </div>
+    </div>
     <new-price :showPopup="showNewPricePopup" @close="showNewPricePopup = false" />
   </div>
 </template>
@@ -50,9 +94,14 @@
 <script>
 import { ref, computed, onMounted } from 'vue';
 import { db } from '@/services/firebase';
-import { collection, getDocs, deleteDoc, doc } from 'firebase/firestore';
+import { collection, getDocs, getDoc, deleteDoc, addDoc, doc } from 'firebase/firestore';
 import NewPrice from '@/components/prices/NewPrice.vue';
 import { emitter } from '@/services/emitter';
+
+const unitConversions = {
+  g: 1, kg: 1000, oz: 28.35, lb: 453.59,
+  ml: 1, L: 1000,
+};
 
 export default {
   components: { NewPrice },
@@ -63,8 +112,10 @@ export default {
     const selectedCategory = ref('');
     const selectedStore = ref('');
     const showNewPricePopup = ref(false);
-    const showModal = ref(false);
-    const selectedPrice = ref(null);
+    const showDeleteModal = ref(false);
+    const showEditModal = ref(false);
+    const selectedProductName = ref('');
+    const selectedProduct = ref(null);
 
     const fetchPrices = async () => {
       const querySnapshot = await getDocs(collection(db, 'prices'));
@@ -79,43 +130,77 @@ export default {
       await fetchPrices();
     };
 
-    const openModal = (price) => {
-      selectedPrice.value = price;
-      showModal.value = true;
+    const modifyPrice = async (id) => {
+      await deleteDoc(doc(db, 'prices', id));
+      await addDoc(collection(db, 'prices'), selectedProduct.value);
+      await fetchPrices();
+      closeEditModal();
     };
 
-    const closeModal = () => {
-      showModal.value = false;
-      selectedPrice.value = null;
+    const openDeleteModal = (productName) => {
+      selectedProductName.value = productName;
+      showDeleteModal.value = true;
+    };
+
+    const closeDeleteModal = () => {
+      showDeleteModal.value = false;
+      selectedProductName.value = '';
+    };
+
+    const openModifyModal = (product) => {
+      selectedProduct.value = product;
+      showEditModal.value = true;
+    };
+
+    const closeEditModal = () => {
+      showEditModal.value = false;
+      selectedProductName.value = '';
     };
 
     const filteredPrices = computed(() => {
-      return prices.value.filter(
-        p =>
-          (!selectedCategory.value || p.category === selectedCategory.value) &&
-          (!selectedStore.value || p.store === selectedStore.value)
+      return prices.value.filter(p =>
+        (!selectedCategory.value || p.category === selectedCategory.value) &&
+        (!selectedStore.value || p.store === selectedStore.value)
       );
     });
+
+    const comparedPrices = computed(() => {
+      return prices.value.filter(p => p.name.toLowerCase() === selectedProductName.value.toLowerCase()).map(p => {
+        const baseUnit = unitConversions[p.unit] || 1;
+        const comparablePrice = p.price / (p.quantity * baseUnit);
+        return { ...p, comparablePrice, originalPrice: p.price, originalQuantity: p.quantity, originalUnit: p.unit };
+      }).sort((a, b) => a.comparablePrice - b.comparablePrice);
+    });
+
+    const bestPrice = computed(() => comparedPrices.value[0] || null);
 
     onMounted(fetchPrices);
 
     return {
-      prices,
+      bestPrice,
       categories,
-      stores,
-      selectedCategory,
-      selectedStore,
-      filteredPrices,
-      showNewPricePopup,
+      closeDeleteModal,
+      closeEditModal,
+      comparedPrices,
       deletePrice,
-      showModal,
-      selectedPrice,
-      openModal,
-      closeModal,
+      filteredPrices,
+      modifyPrice,
+      openDeleteModal,
+      openModifyModal,
+      prices,
+      selectedCategory,
+      selectedProduct,
+      selectedProductName,
+      selectedStore,
+      showDeleteModal,
+      showEditModal,
+      showNewPricePopup,
+      stores,
     };
-  },
+  }
 };
 </script>
+
 
 <style>
 body {
@@ -194,5 +279,10 @@ body {
   color: white;
   margin-top: 10px;
   display: block;
+}
+
+.horizontalLine {
+  border-top: 1px solid #ccc;
+  margin: 10px 0;
 }
 </style>

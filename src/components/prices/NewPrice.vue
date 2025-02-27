@@ -34,7 +34,7 @@
         </label>
 
         <label>Categoría:
-          <select v-model="category" required>
+          <select class="soloSelect" v-model="category" required>
             <option v-for="cat in categories" :key="cat" :value="cat">{{ cat }}</option>
           </select>
         </label>
@@ -62,8 +62,8 @@ export default {
     const date = ref('');
     const brand = ref('');
     const category = ref('');
-    const units = ['unit', 'ml', 'mg', 'g', 'kg', 'L'];
-    const categories = ['Lácteos', 'Carnes', 'Cereal', 'Verduras', 'Frutas', 'Bebidas'];
+    const units = ['unit', 'ml', 'L', 'g', 'kg', 'oz', 'lb'];
+    const categories = ['Lácteos', 'Carnes', 'Cereal', 'Verduras', 'Frutas', 'Bebidas', 'Pan', 'Dulces', 'Snacks', 'Jabones', 'Limpieza', 'Otros'];
     const previousStores = ref([]);
     const name = ref('');
 
@@ -125,7 +125,7 @@ button {
   margin-bottom: 4px;
 }
 
-input {
+input, .soloSelect {
   margin-left: auto;
   width: 60%;
 }
