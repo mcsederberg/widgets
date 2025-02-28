@@ -1,46 +1,46 @@
 <template>
   <div v-if="showPopup" class="popup-overlay">
     <div class="popup">
-      <h2>Nuevo Precio</h2>
+      <h2>New Price</h2>
       <form @submit.prevent="savePrice">
-        <label>Nombre:
-          <input  v-model.number="name" required />
+        <label>Name:
+          <input v-model.number="name" required />
         </label>
 
-        <label>Precio:
+        <label>Price:
           <input type="number" v-model.number="price" required />
         </label>
 
-        <label>Cantidad:
+        <label>Quantity:
           <input type="number" v-model.number="quantity" required class="quantityInput" />
           <select v-model="unit">
             <option v-for="option in units" :key="option" :value="option">{{ option }}</option>
           </select>
         </label>
 
-        <label>Tienda:
+        <label>Store:
           <input type="text" v-model="store" list="store-list" required />
           <datalist id="store-list">
             <option v-for="store in previousStores" :key="store" :value="store" />
           </datalist>
         </label>
 
-        <label>Marca:
+        <label>Brand:
           <input type="text" v-model="brand" />
         </label>
 
-        <label>Fecha (opcional):
+        <label>Date (optional):
           <input type="date" v-model="date" />
         </label>
 
-        <label>Categoría:
+        <label>Category:
           <select class="soloSelect" v-model="category" required>
             <option v-for="cat in categories" :key="cat" :value="cat">{{ cat }}</option>
           </select>
         </label>
 
-        <button type="submit">Guardar</button>
-        <button type="button" @click="closePopup">Cancelar</button>
+        <button type="submit">Save</button>
+        <button type="button" @click="closePopup">Cancel</button>
       </form>
     </div>
   </div>
@@ -63,7 +63,7 @@ export default {
     const brand = ref('');
     const category = ref('');
     const units = ['unit', 'ml', 'L', 'g', 'kg', 'oz', 'lb'];
-    const categories = ['Lácteos', 'Carnes', 'Cereal', 'Verduras', 'Frutas', 'Bebidas', 'Pan', 'Dulces', 'Snacks', 'Jabones', 'Limpieza', 'Otros'];
+    const categories = ['Dairy', 'Meat', 'Cereal', 'Vegetables', 'Fruits', 'Drinks', 'Bread', 'Sweets', 'Snacks', 'Soaps', 'Cleaning', 'Other'];
     const previousStores = ref([]);
     const name = ref('');
 
@@ -125,7 +125,8 @@ button {
   margin-bottom: 4px;
 }
 
-input, .soloSelect {
+input,
+.soloSelect {
   margin-left: auto;
   width: 60%;
 }

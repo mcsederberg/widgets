@@ -1,20 +1,20 @@
 <template>
   <div>
-    <h2>Lista de Precios</h2>
+    <h2>Price List</h2>
     <button @click="showNewPricePopup = true" class="btn-primary">
-      Agregar Nuevo Precio
+      Add new Price
     </button>
 
     <div class="filters">
-      <label for="category">Categoría:</label>
+      <label for="category">Category:</label>
       <select id="category" v-model="selectedCategory">
-        <option value="">Todas</option>
+        <option value="">All</option>
         <option v-for="cat in categories" :key="cat" :value="cat">{{ cat }}</option>
       </select>
 
-      <label for="store">Tienda:</label>
+      <label for="store">Store:</label>
       <select id="store" v-model="selectedStore">
-        <option value="">Todas</option>
+        <option value="">All</option>
         <option v-for="store in stores" :key="store" :value="store">{{ store }}</option>
       </select>
     </div>
@@ -22,67 +22,67 @@
     <div class="card-container">
       <div v-for="price in filteredPrices" :key="price.id" class="price-card" @click="openDeleteModal(price.name)">
         <h3>{{ price.name }}</h3>
-        <p><strong>Categoría:</strong> {{ price.category }}</p>
-        <p><strong>Tienda:</strong> {{ price.store }}</p>
-        <p><strong>Marca:</strong> {{ price.brand }}</p>
-        <p><strong>Precio:</strong> ${{ price.price }}</p>
-        <p><strong>Cantidad:</strong> {{ price.quantity }} {{ price.unit }}</p>
-        <button @click.stop="deletePrice(price.id)" class="btn-delete">Eliminar</button>
-        <button @click.stop="openModifyModal(price)" class="btn-secondary">Modificar</button>
+        <p><strong>Category:</strong> {{ price.category }}</p>
+        <p><strong>Store:</strong> {{ price.store }}</p>
+        <p><strong>Brand:</strong> {{ price.brand }}</p>
+        <p><strong>Price:</strong> ${{ price.price }}</p>
+        <p><strong>Quantity:</strong> {{ price.quantity }} {{ price.unit }}</p>
+        <button @click.stop="deletePrice(price.id)" class="btn-delete">Delete</button>
+        <button @click.stop="openModifyModal(price)" class="btn-secondary">Edit</button>
       </div>
     </div>
 
     <div v-if="showDeleteModal" class="modal-overlay" @click="closeDeleteModal">
       <div class="modal" @click.stop>
-        <h3>Comparación de {{ selectedProductName }}</h3>
+        <h3>Comparison of {{ selectedProductName }}</h3>
         <p v-for="product in comparedPrices" :key="product.id">
           <strong>{{ product.store }} ({{ product.brand }}):</strong>
-          ${{ product.price }} por {{ product.quantity }} {{ product.unit }}
+          ${{ product.price }} for {{ product.quantity }} {{ product.unit }}
           <br>
-          (Unidad base: ${{ product.comparablePrice.toFixed(2) }} por 1g/ml)
+          (Base price: ${{ product.comparablePrice.toFixed(2) }} for 1g/ml)
         </p>
         <div class="horizontalLine"></div>
-        <p><strong>Mejor Precio:</strong> {{ bestPrice?.store }} - ${{ bestPrice?.originalPrice }} por {{
+        <p><strong>Best Price:</strong> {{ bestPrice?.store }} - ${{ bestPrice?.originalPrice }} for {{
           bestPrice?.originalQuantity }} {{ bestPrice?.originalUnit }}</p>
-        <button @click="closeDeleteModal" class="btn-secondary">Cerrar</button>
+        <button @click="closeDeleteModal" class="btn-secondary">Close</button>
       </div>
     </div>
 
     <div v-if="showEditModal" class="modal-overlay" @click="closeEditModal">
       <div class="modal" @click.stop>
-        <h3>Modificar Precio de {{ selectedProduct.name }}</h3>
+        <h3>Edit Price of {{ selectedProduct.name }}</h3>
         <form @submit.prevent="modifyPrice(selectedProduct.id)">
-          <label>Nombre:
+          <label>Name:
             <input v-model="selectedProduct.name" required />
           </label>
-          <label>Categoría:
+          <label>Category:
             <select v-model="selectedProduct.category" required>
               <option v-for="cat in categories" :key="cat" :value="cat">{{ cat }}</option>
             </select>
           </label>
-          <label>Tienda:
+          <label>Store:
             <input type="text" v-model="selectedProduct.store" list="store-list" required />
             <datalist id="store-list">
               <option v-for="store in stores" :key="store" :value="store" />
             </datalist>
           </label>
-          <label>Marca:
+          <label>Brand:
             <input type="text" v-model="selectedProduct.brand" />
           </label>
-          <label>Precio:
+          <label>Price:
             <input type="number" v-model.number="selectedProduct.price" required />
           </label>
-          <label>Cantidad:
+          <label>Quantity:
             <input type="number" v-model.number="selectedProduct.quantity" required class="quantityInput" />
             <select v-model="selectedProduct.unit">
               <option v-for="option in units" :key="option" :value="option">{{ option }}</option>
             </select>
           </label>
-          <label>Fecha (opcional):
+          <label>Date (optional):
             <input type="date" v-model="selectedProduct.date" />
           </label>
-          <button type="submit">Guardar</button>
-          <button type="button" @click="closeEditModal">Cancelar</button>
+          <button type="submit">Save</button>
+          <button type="button" @click="closeEditModal">Cancel</button>
         </form>
 
       </div>
@@ -107,9 +107,10 @@ export default {
   components: { NewPrice },
   setup() {
     const prices = ref([]);
-    const categories = ['Lácteos', 'Carnes', 'Cereal', 'Verduras', 'Frutas', 'Bebidas'];
+    const categories = ['Dairy', 'Meat', 'Cereal', 'Vegetables', 'Fruits', 'Drinks', 'Bread', 'Sweets', 'Snacks', 'Soaps', 'Cleaning', 'Other'];
     const stores = ref([]);
     const selectedCategory = ref('');
+    const units = ['unit', 'ml', 'L', 'g', 'kg', 'oz', 'lb'];
     const selectedStore = ref('');
     const showNewPricePopup = ref(false);
     const showDeleteModal = ref(false);
@@ -185,6 +186,7 @@ export default {
       deletePrice,
       filteredPrices,
       modifyPrice,
+      units,
       openDeleteModal,
       openModifyModal,
       prices,

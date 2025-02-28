@@ -1,7 +1,8 @@
 <template>
   <div class="recipe-detail">
     <h2>{{ recipe?.title || "Loading..." }}</h2>
-    <p><strong>Contributor:</strong> {{ recipe?.contributor || "Unknown" }}</p>
+    <p><strong>Recipe By:</strong> {{ recipe?.contributor || "Unknown" }}</p>
+    <p v-if="recipe?.createdBy"><strong>Added By:</strong> {{ recipe?.createdBy || "Unknown" }}</p>
 
     <div v-if="loading">Loading recipe...</div>
     <div v-else-if="!recipe">Recipe not found.</div>
@@ -9,16 +10,20 @@
       <h3>Ingredients:</h3>
       <ul>
         <li v-for="(ingredient, index) in recipe.ingredients" :key="index">
-          <input type="checkbox" v-model="checkedIngredients[index]" />
-          <span :class="{ checked: checkedIngredients[index] }">{{ ingredient }}</span>
+          <label :class="{ checked: checkedIngredients[index] }">
+            <input type="checkbox" v-model="checkedIngredients[index]" />
+            {{ ingredient }}
+          </label>
         </li>
       </ul>
 
       <h3>Instructions:</h3>
       <ul>
         <li v-for="(step, index) in formattedInstructions" :key="index">
-          <input type="checkbox" v-model="checkedInstructions[index]" />
-          <span :class="{ checked: checkedInstructions[index] }">{{ step }}</span>
+          <label :class="{ checked: checkedInstructions[index] }">
+            <input type="checkbox" v-model="checkedInstructions[index]" />
+            {{ step }}
+          </label>
         </li>
       </ul>
     </div>
@@ -85,7 +90,7 @@ export default {
 };
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .recipe-detail {
   max-width: 400px;
   margin: auto;
@@ -106,6 +111,15 @@ li {
   padding: 5px 0;
   display: flex;
   align-items: center;
+
+  input {
+    width: 20px;
+    margin-left: 5px;
+    margin-bottom: auto;
+  }
+  label {
+    text-align: justify;
+  }
 }
 
 input[type="checkbox"] {
