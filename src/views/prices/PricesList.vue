@@ -42,7 +42,7 @@
           (Base price: ${{ product.comparablePrice.toFixed(2) }} for 1g/ml)
         </p>
         <div class="horizontalLine"></div>
-        <p><strong>Best Price:</strong> {{ bestPrice?.store }} - ${{ bestPrice?.originalPrice }} for {{
+        <p><strong>Best Price:</strong> {{ bestPrice?.store }} {{ bestPrice?.brand }} - ${{ bestPrice?.originalPrice }} for {{
           bestPrice?.originalQuantity }} {{ bestPrice?.originalUnit }}</p>
         <button @click="closeDeleteModal" class="btn-secondary">Close</button>
       </div>
