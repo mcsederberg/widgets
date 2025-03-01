@@ -166,7 +166,7 @@ export default {
     });
 
     const comparedPrices = computed(() => {
-      return prices.value.filter(p => p.name.toLowerCase() === selectedProductName.value.toLowerCase()).map(p => {
+      return prices.value.filter(p => p.name.toLowerCase().trim() == selectedProductName.value.toLowerCase().trim()).map(p => {
         const baseUnit = unitConversions[p.unit] || 1;
         const comparablePrice = p.price / (p.quantity * baseUnit);
         return { ...p, comparablePrice, originalPrice: p.price, originalQuantity: p.quantity, originalUnit: p.unit };
