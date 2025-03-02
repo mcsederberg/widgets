@@ -12,13 +12,17 @@ import Login from "@/views/Login.vue";
 
 import PricesList from "@/views/prices/PricesList.vue";
 
+import Menu from "@/views/menu/Menu.vue";
+import CreateOrder from "@/views/menu/CreateOrder.vue";
+import ListOrders from "@/views/menu/ListOrders.vue";
+
 const requireAuth = (to, from, next) => {
   const auth = getAuth();
   onAuthStateChanged(auth, (user) => {
     if (user) {
       next();
     } else {
-      next("/login"); // Redirect to home or a login page
+      next("/login");
     }
   });
 };
@@ -65,10 +69,29 @@ const routes = [
     path: "/prices",
     component: PricesList,
     beforeEnter: requireAuth,
+    children: [],
+  },
+  {
+    path: "/menu",
+    beforeEnter: requireAuth,
     children: [
-      
-    ]
-  }
+      {
+        path: "",
+        name: "Menu",
+        component: Menu,
+      },
+      {
+        path: "create-order",
+        name: "CreateOrder",
+        component: CreateOrder,
+      },
+      {
+        path: "orders",
+        name: "ListOrders",
+        component: ListOrders,
+      },
+    ],
+  },
 ];
 
 const router = createRouter({
