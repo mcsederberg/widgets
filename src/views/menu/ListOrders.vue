@@ -35,47 +35,6 @@
 </template>
 
 <script>
-import { ref, computed, onMounted } from "vue";
-import { db } from "@/services/firebase";
-import { collection, getDocs } from "firebase/firestore";
-
-export default {
-  setup() {
-    const orders = ref([]);
-    const selectedDate = ref(null);
-
-    // Fetch orders from Firestore
-    const fetchOrders = async () => {
-      const querySnapshot = await getDocs(collection(db, "orders"));
-      orders.value = querySnapshot.docs.map(doc => doc.data());
-      if (orders.value.length) {
-        selectedDate.value = orders.value[0].date; // Default to the first date
-      }
-    };
-
-    // Extract unique dates
-    const uniqueDates = computed(() => {
-      return [...new Set(orders.value.map(order => order.date))].sort();
-    });
-
-    // Filter orders by selected date
-    const filteredOrders = computed(() => {
-      return orders.value.filter(order => order.date === selectedDate.value);
-    });
-
-    onMounted(fetchOrders);
-
-    return {
-      orders,
-      selectedDate,
-      uniqueDates,
-      filteredOrders,
-    };
-  },
-};
-</script>
-
-<script>
 import { ref, onMounted, computed } from 'vue';
 import { db } from '@/services/firebase';
 import { collection, getDocs, doc, updateDoc, deleteDoc } from 'firebase/firestore';
@@ -87,7 +46,7 @@ export default {
     const editingOrder = ref(null);
     const deletingOrderId = ref(null);
     const selectedDate = ref(new Date().toISOString().split('T')[0]); // Default to today
-
+const selectedDate = ref(null);
     const fetchOrders = async () => {
       const querySnapshot = await getDocs(collection(db, 'orders'));
       orders.value = querySnapshot.docs.map(doc => {
@@ -153,6 +112,16 @@ export default {
       }
     };
 
+// Extract unique dates
+    const uniqueDates = computed(() => {
+      return [...new Set(orders.value.map(order => order.date))].sort();
+    });
+
+    // Filter orders by selected date
+    const filteredOrders = computed(() => {
+      return orders.value.filter(order => order.date === selectedDate.value);
+    });
+
     onMounted(async () => {
       await fetchOrders();
       await fetchMenuItems();
@@ -173,6 +142,10 @@ export default {
       confirmDelete,
       deleteOrder,
       fetchOrders,
+
+      
+      uniqueDates,
+      
     };
   }
 };
