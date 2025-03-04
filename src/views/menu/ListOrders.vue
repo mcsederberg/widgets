@@ -7,16 +7,21 @@
       <router-link to="/menu/create-order">Create Order</router-link>
     </nav>
 
-    <!-- Date Picker -->
-    <label for="order-date">Select Date:</label>
-    <input id="order-date" type="date" v-model="selectedDate" @change="fetchOrders" />
-
     <p><strong>Total Earned: ${{ totalEarned.toFixed(2) }}</strong></p>
+
+    <!-- Date Selector -->
+    <label for="order-date">Select Date:</label>
+    <select id="order-date" v-model="selectedDate">
+      <option v-for="date in uniqueDates" :key="date" :value="date">
+        {{ date }}
+      </option>
+    </select>
 
     <ul>
       <li v-for="order in filteredOrders" :key="order.id">
-        <strong>{{ order.customer }}</strong> ({{ order.date }})
-        
+        <strong>{{ order.customer }}</strong>
+        <p>Date: {{ order.date }}</p>
+
         <ul>
           <li v-for="item in order.items" :key="item.name">
             {{ item.name }} x{{ item.quantity }} - ${{ (item.price * item.quantity).toFixed(2) }}
@@ -24,46 +29,51 @@
         </ul>
 
         <p><strong>Total: ${{ order.totalPrice.toFixed(2) }}</strong></p>
-
-        <button @click="openEditPopup(order)" class="mr-4">✏️</button>
-        <button @click="confirmDelete(order.id)">🗑️</button>
-        <div class="horizontalLine"></div>
       </li>
     </ul>
-
-    <!-- Edit Order Popup -->
-    <div v-if="editingOrder" class="popup">
-      <div class="popup-content">
-        <h3>Edit Order</h3>
-        <p><b>Customer:</b> {{ editingOrder.customer }}</p>
-
-        <ul class="menuItems">
-          <li v-for="item in menuItems" :key="item.id" class="mb-2">
-            {{ item.name }}<br>
-            ${{ item.price.toFixed(2) }}
-            <button @click="updateQuantity(item, -1)">-</button>
-            <button class="mr-4 ml-2" @click="updateQuantity(item, 1)">+</button>
-            <span><b>x{{ getItemQuantity(item.id) }}</b></span>
-          </li>
-        </ul>
-        <div class="horizontalLine"></div>
-        <p><strong>Total: ${{ editingOrder.totalPrice.toFixed(2) }}</strong></p>
-
-        <button class="mr-4" @click="saveOrder">Save</button>
-        <button @click="editingOrder = null">Cancel</button>
-      </div>
-    </div>
-
-    <!-- Delete Confirmation Popup -->
-    <div v-if="deletingOrderId" class="popup">
-      <div class="popup-content">
-        <p>Are you sure you want to delete this order?</p>
-        <button @click="deleteOrder">Yes, Delete</button>
-        <button @click="deletingOrderId = null">Cancel</button>
-      </div>
-    </div>
   </div>
 </template>
+
+<script>
+import { ref, computed, onMounted } from "vue";
+import { db } from "@/services/firebase";
+import { collection, getDocs } from "firebase/firestore";
+
+export default {
+  setup() {
+    const orders = ref([]);
+    const selectedDate = ref(null);
+
+    // Fetch orders from Firestore
+    const fetchOrders = async () => {
+      const querySnapshot = await getDocs(collection(db, "orders"));
+      orders.value = querySnapshot.docs.map(doc => doc.data());
+      if (orders.value.length) {
+        selectedDate.value = orders.value[0].date; // Default to the first date
+      }
+    };
+
+    // Extract unique dates
+    const uniqueDates = computed(() => {
+      return [...new Set(orders.value.map(order => order.date))].sort();
+    });
+
+    // Filter orders by selected date
+    const filteredOrders = computed(() => {
+      return orders.value.filter(order => order.date === selectedDate.value);
+    });
+
+    onMounted(fetchOrders);
+
+    return {
+      orders,
+      selectedDate,
+      uniqueDates,
+      filteredOrders,
+    };
+  },
+};
+</script>
 
 <script>
 import { ref, onMounted, computed } from 'vue';
