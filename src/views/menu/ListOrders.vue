@@ -1,3 +1,7 @@
+
+
+
+
 <template>
   <div>
     <h2>Orders</h2>
@@ -46,13 +50,19 @@ export default {
     const editingOrder = ref(null);
     const deletingOrderId = ref(null);
     const selectedDate = ref(new Date().toISOString().split('T')[0]); // Default to today
+    
+// Fetch orders from Firestore
     const fetchOrders = async () => {
       const querySnapshot = await getDocs(collection(db, 'orders'));
       orders.value = querySnapshot.docs.map(doc => {
         const data = doc.data();
-        const totalPrice = data.items.reduce((sum, item) => sum + item.price * item.quantity, 0);
-        return { id: doc.id, ...data, totalPrice };
+        return { id: doc.id, ...data, totalPrice: data.items.reduce((sum, item) => sum + item.price * item.quantity, 0) };
       });
+
+      // Default to the first available date
+      if (orders.value.length) {
+        selectedDate.value = orders.value[0].date.split('T')[0];
+      }
     };
 
     const fetchMenuItems = async () => {
@@ -64,8 +74,9 @@ export default {
       return filteredOrders.value.reduce((sum, order) => sum + order.totalPrice, 0);
     });
 
+    // Filter orders by selected date
     const filteredOrders = computed(() => {
-      return orders.value.filter(order => order.date === selectedDate.value);
+      return orders.value.filter(order => order.date.split('T')[0] === selectedDate.value);
     });
 
     const openEditPopup = (order) => {
@@ -111,9 +122,9 @@ export default {
       }
     };
 
-// Extract unique dates
+// // Extract unique dates (formatted)
     const uniqueDates = computed(() => {
-      return [...new Set(orders.value.map(order => order.date))].sort();
+      return [...new Set(orders.value.map(order => order.date.split('T')[0]))].sort();
     });
 
     onMounted(async () => {
@@ -121,6 +132,10 @@ export default {
       await fetchMenuItems();
     });
 
+// Format date to YYYY-MM-DD
+    const formatDate = (isoDate) => {
+      return isoDate.split('T')[0];
+    };
     return {
       orders,
       menuItems,
@@ -136,7 +151,7 @@ export default {
       confirmDelete,
       deleteOrder,
       fetchOrders,
-
+formatDate,
       
       uniqueDates,
       
