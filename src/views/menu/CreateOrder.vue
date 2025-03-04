@@ -7,13 +7,13 @@
       <router-link to="/menu/orders">View Orders</router-link>
     </nav>
 
-    <input v-model="customerName" placeholder="Customer Name" required />
+    <input class="mt-4" v-model="customerName" placeholder="Customer Name" required />
 
     <ul>
       <li v-for="item in menuItems" :key="item.id">
         {{ item.name }} - ${{ item.price.toFixed(2) }}
+        <button class="mx-4 " @click="removeItem(item)">-</button>
         <button @click="addItem(item)">+</button>
-        <button @click="removeItem(item)">-</button>
         <span v-if="orderItems[item.id]">x{{ orderItems[item.id].quantity }}</span>
       </li>
     </ul>
@@ -67,6 +67,7 @@ export default {
       await addDoc(collection(db, 'orders'), {
         customer: customerName.value,
         items: itemsArray,
+        date: new Date().toISOString(),
       });
 
       customerName.value = '';

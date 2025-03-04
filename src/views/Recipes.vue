@@ -20,7 +20,7 @@ export default {
       // create an async function to request a wake lock
       try {
         wakeLock = await navigator.wakeLock.request("screen");
-        window.alert("Wake Lock is active!");
+        // window.alert("Wake Lock is active!");
       } catch (err) {
         // The Wake Lock request has failed - usually system related, such as battery.
         console.error(`${err.name}, ${err.message}`);

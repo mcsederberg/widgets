@@ -21,8 +21,9 @@
 
         <p><strong>Total: ${{ order.totalPrice.toFixed(2) }}</strong></p>
 
-        <button @click="openEditPopup(order)">✏️</button>
+        <button @click="openEditPopup(order)" class="mr-4">✏️</button>
         <button @click="confirmDelete(order.id)">🗑️</button>
+        <div class="horizontalLine"></div>
       </li>
     </ul>
 
@@ -30,20 +31,21 @@
     <div v-if="editingOrder" class="popup">
       <div class="popup-content">
         <h3>Edit Order</h3>
-        <p>Customer: {{ editingOrder.customer }}</p>
+        <p><b>Customer:</b> {{ editingOrder.customer }}</p>
 
-        <ul>
-          <li v-for="item in menuItems" :key="item.id">
-            {{ item.name }} - ${{ item.price.toFixed(2) }}
-            <button @click="updateQuantity(item, 1)">+</button>
+        <ul class="menuItems">
+          <li v-for="item in menuItems" :key="item.id" class="mb-2">
+            {{ item.name }}<br>
+            ${{ item.price.toFixed(2) }}
             <button @click="updateQuantity(item, -1)">-</button>
-            <span>x{{ getItemQuantity(item.id) }}</span>
+            <button class="mr-4 ml-2" @click="updateQuantity(item, 1)">+</button>
+            <span><b>x{{ getItemQuantity(item.id) }}</b></span>
           </li>
         </ul>
-
+        <div class="horizontalLine"></div>
         <p><strong>Total: ${{ editingOrder.totalPrice.toFixed(2) }}</strong></p>
 
-        <button @click="saveOrder">Save</button>
+        <button class="mr-4" @click="saveOrder">Save</button>
         <button @click="editingOrder = null">Cancel</button>
       </div>
     </div>
@@ -154,5 +156,16 @@ export default {
 }
 .popup-content {
   text-align: center;
+}
+
+.menuItems {
+  list-style: none;
+  padding: 0;
+  height: 600px;
+  max-height: 60vh;
+  overflow-y: auto;
+  border: 1px solid #ccc;
+  padding: 10px;
+  border-radius: 5px;
 }
 </style>

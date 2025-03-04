@@ -15,6 +15,7 @@ import PricesList from "@/views/prices/PricesList.vue";
 import Menu from "@/views/menu/Menu.vue";
 import CreateOrder from "@/views/menu/CreateOrder.vue";
 import ListOrders from "@/views/menu/ListOrders.vue";
+import Restaurants from "@/views/menu/Restaurants.vue";
 
 const requireAuth = (to, from, next) => {
   const auth = getAuth();
@@ -90,6 +91,11 @@ const routes = [
         name: "ListOrders",
         component: ListOrders,
       },
+      {
+        path: "restaurants",
+        name: "Restaurants",
+        component: Restaurants,
+      }
     ],
   },
 ];

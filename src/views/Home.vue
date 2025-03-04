@@ -13,15 +13,16 @@
 
 import { ref, onUpdated, computed, } from 'vue'
 
-import { useRoute, useRouter } from 'vue-router'
+
+
 export default {
   name: 'Home',
 
   setup(props, { emit }) {
-    const route = useRoute();
-
     const widgets = ref([
       { id: 1, name: 'Recipes', url: '/recipes' },
+      { id: 2, name: 'Prices', url: '/prices' },
+      { id: 3, name: 'Restaurant', url: '/menu' },
     ]);
     return {
       widgets,

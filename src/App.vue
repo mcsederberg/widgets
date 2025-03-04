@@ -1,5 +1,5 @@
 <template>
-  <!-- <Header></Header> -->
+  <Header></Header>
   <div id="body">
     <!-- <Sidebar>
     </Sidebar> -->
@@ -9,11 +9,32 @@
 <script>
 import Header from './components/Header.vue'
 import Sidebar from './components/Sidebar.vue'
+import { auth } from "@/services/firebase";
+import { useUserStore } from "@/stores/userStore";
+import { storeToRefs } from "pinia";
+import { useRoute, useRouter } from 'vue-router'
 export default {
   name: 'App',
   components: {
     Header,
     Sidebar,
+  },
+  setup() {
+    const route = useRoute();
+    const router = useRouter();
+    const userStore = useUserStore();
+    const { currentUser } = storeToRefs(userStore);
+
+    auth.onAuthStateChanged((user) => {
+      if (user) {
+        currentUser.value = user;
+      } else {
+        currentUser.value = null;
+        if (route.path !== '/login') {
+          router.push('/login')
+        }
+      }
+    });
   }
 }
 </script>

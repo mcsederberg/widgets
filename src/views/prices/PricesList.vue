@@ -20,7 +20,7 @@
     </div>
 
     <div class="card-container">
-      <div v-for="price in filteredPrices" :key="price.id" class="price-card" @click="openDeleteModal(price.name)">
+      <div v-for="price in filteredPrices" :key="price.id" class="card" @click="openDeleteModal(price.name)">
         <h3>{{ price.name }}</h3>
         <p><strong>Category:</strong> {{ price.category }}</p>
         <p><strong>Store:</strong> {{ price.store }}</p>
@@ -223,19 +223,6 @@ body {
   gap: 15px;
 }
 
-.price-card {
-  background: #ffffff;
-  color: #333;
-  padding: 15px;
-  border-radius: 10px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-  transition: transform 0.2s;
-  cursor: pointer;
-}
-
-.price-card:hover {
-  transform: scale(1.03);
-}
 
 .modal-overlay {
   position: fixed;
@@ -283,8 +270,4 @@ body {
   display: block;
 }
 
-.horizontalLine {
-  border-top: 1px solid #ccc;
-  margin: 10px 0;
-}
 </style>
