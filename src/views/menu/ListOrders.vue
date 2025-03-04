@@ -46,7 +46,6 @@ export default {
     const editingOrder = ref(null);
     const deletingOrderId = ref(null);
     const selectedDate = ref(new Date().toISOString().split('T')[0]); // Default to today
-const selectedDate = ref(null);
     const fetchOrders = async () => {
       const querySnapshot = await getDocs(collection(db, 'orders'));
       orders.value = querySnapshot.docs.map(doc => {
