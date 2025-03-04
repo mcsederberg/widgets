@@ -7,11 +7,15 @@
       <router-link to="/menu/create-order">Create Order</router-link>
     </nav>
 
+    <!-- Date Picker -->
+    <label for="order-date">Select Date:</label>
+    <input id="order-date" type="date" v-model="selectedDate" @change="fetchOrders" />
+
     <p><strong>Total Earned: ${{ totalEarned.toFixed(2) }}</strong></p>
 
     <ul>
-      <li v-for="order in orders" :key="order.id">
-        <strong>{{ order.customer }}</strong>
+      <li v-for="order in filteredOrders" :key="order.id">
+        <strong>{{ order.customer }}</strong> ({{ order.date }})
         
         <ul>
           <li v-for="item in order.items" :key="item.name">
@@ -72,6 +76,7 @@ export default {
     const menuItems = ref([]);
     const editingOrder = ref(null);
     const deletingOrderId = ref(null);
+    const selectedDate = ref(new Date().toISOString().split('T')[0]); // Default to today
 
     const fetchOrders = async () => {
       const querySnapshot = await getDocs(collection(db, 'orders'));
@@ -88,7 +93,11 @@ export default {
     };
 
     const totalEarned = computed(() => {
-      return orders.value.reduce((sum, order) => sum + order.totalPrice, 0);
+      return filteredOrders.value.reduce((sum, order) => sum + order.totalPrice, 0);
+    });
+
+    const filteredOrders = computed(() => {
+      return orders.value.filter(order => order.date === selectedDate.value);
     });
 
     const openEditPopup = (order) => {
@@ -139,7 +148,22 @@ export default {
       await fetchMenuItems();
     });
 
-    return { orders, menuItems, totalEarned, editingOrder, deletingOrderId, openEditPopup, updateQuantity, getItemQuantity, saveOrder, confirmDelete, deleteOrder };
+    return {
+      orders,
+      menuItems,
+      selectedDate,
+      totalEarned,
+      filteredOrders,
+      editingOrder,
+      deletingOrderId,
+      openEditPopup,
+      updateQuantity,
+      getItemQuantity,
+      saveOrder,
+      confirmDelete,
+      deleteOrder,
+      fetchOrders,
+    };
   }
 };
 </script>
