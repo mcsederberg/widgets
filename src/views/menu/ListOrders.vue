@@ -116,11 +116,6 @@ export default {
       return [...new Set(orders.value.map(order => order.date))].sort();
     });
 
-    // Filter orders by selected date
-    const filteredOrders = computed(() => {
-      return orders.value.filter(order => order.date === selectedDate.value);
-    });
-
     onMounted(async () => {
       await fetchOrders();
       await fetchMenuItems();
