@@ -17,6 +17,12 @@
         <option value="">All</option>
         <option v-for="store in stores" :key="store" :value="store">{{ store }}</option>
       </select>
+
+      <label for="product">Product:</label>
+      <select id="product" v-model="selectedProductFilter">
+        <option value="">All</option>
+        <option v-for="product in products" :key="product" :value="product">{{ product }}</option>
+      </select>
     </div>
 
     <div class="card-container">
@@ -27,8 +33,11 @@
         <p><strong>Brand:</strong> {{ price.brand }}</p>
         <p><strong>Price:</strong> ${{ price.price }}</p>
         <p><strong>Quantity:</strong> {{ price.quantity }} {{ price.unit }}</p>
-        <button @click.stop="deletePrice(price.id)" class="btn-delete">Delete</button>
-        <button @click.stop="openModifyModal(price)" class="btn-secondary">Edit</button>
+        <div class="row gap-4 align-center">
+          <button @click.stop="deletePrice(price.id)" class="btn-delete">Delete</button>
+          <button @click.stop="openModifyModal(price)" class="btn-secondary">Edit</button>
+          <button @click.stop="openCopyModal(price)" class="btn-primary">Copy</button>
+        </div>
       </div>
     </div>
 
@@ -42,8 +51,9 @@
           (Base price: ${{ product.comparablePrice.toFixed(2) }} for 1g/ml)
         </p>
         <div class="horizontalLine"></div>
-        <p><strong>Best Price:</strong> {{ bestPrice?.store }} {{ bestPrice?.brand }} - ${{ bestPrice?.originalPrice }} for {{
-          bestPrice?.originalQuantity }} {{ bestPrice?.originalUnit }}</p>
+        <p><strong>Best Price:</strong> {{ bestPrice?.store }} {{ bestPrice?.brand }} - ${{ bestPrice?.originalPrice }}
+          for {{
+            bestPrice?.originalQuantity }} {{ bestPrice?.originalUnit }}</p>
         <button @click="closeDeleteModal" class="btn-secondary">Close</button>
       </div>
     </div>
@@ -81,8 +91,8 @@
           <label>Date (optional):
             <input type="date" v-model="selectedProduct.date" />
           </label>
-          <button type="submit">Save</button>
-          <button type="button" @click="closeEditModal">Cancel</button>
+          <button class="btn-primary" type="submit">Save</button>
+          <button class="btn-secondary" type="button" @click="closeEditModal">Cancel</button>
         </form>
 
       </div>
@@ -112,6 +122,8 @@ export default {
     const selectedCategory = ref('');
     const units = ['unit', 'ml', 'L', 'g', 'kg', 'oz', 'lb'];
     const selectedStore = ref('');
+    const selectedProductFilter = ref('');
+    const products = computed(() => [...new Set(prices.value.map(p => p.name))]);
     const showNewPricePopup = ref(false);
     const showDeleteModal = ref(false);
     const showEditModal = ref(false);
@@ -122,6 +134,11 @@ export default {
       const querySnapshot = await getDocs(collection(db, 'prices'));
       prices.value = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       stores.value = [...new Set(prices.value.map(p => p.store))];
+    };
+
+    const openCopyModal = (product) => {
+      selectedProduct.value = { ...product, id: null };
+      showEditModal.value = true;
     };
 
     emitter.on('price-added', fetchPrices);
@@ -161,7 +178,8 @@ export default {
     const filteredPrices = computed(() => {
       return prices.value.filter(p =>
         (!selectedCategory.value || p.category === selectedCategory.value) &&
-        (!selectedStore.value || p.store === selectedStore.value)
+        (!selectedStore.value || p.store === selectedStore.value) &&
+        (!selectedProductFilter.value || p.name.toLowerCase().includes(selectedProductFilter.value.toLowerCase()))
       );
     });
 
@@ -198,6 +216,11 @@ export default {
       showEditModal,
       showNewPricePopup,
       stores,
+      openCopyModal,
+
+      selectedProductFilter,
+      products,
+
     };
   }
 };
@@ -205,9 +228,6 @@ export default {
 
 
 <style>
-body {
-  /* background-color: #f8f9fa; */
-}
 
 .filters {
   display: flex;
@@ -218,7 +238,8 @@ body {
 }
 
 .card-container {
-  display: grid;
+  display: flex;
+  flex-wrap: wrap;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 15px;
 }
@@ -242,32 +263,6 @@ body {
   padding: 20px;
   border-radius: 10px;
   width: 320px;
-}
-
-.btn-primary,
-.btn-delete,
-.btn-secondary {
-  padding: 8px 12px;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-.btn-primary {
-  background-color: #007bff;
-  color: white;
-}
-
-.btn-secondary {
-  background-color: #6c757d;
-  color: white;
-}
-
-.btn-delete {
-  background-color: #dc3545;
-  color: white;
-  margin-top: 10px;
-  display: block;
 }
 
 </style>

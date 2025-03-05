@@ -49,7 +49,6 @@ export default {
           userID: user.uid,
           email: user.email,
           name: user.displayName || "",
-          restaurantID: null, // Admin will assign later
           role: "user", // Default role
         });
       }

@@ -1,6 +1,18 @@
 <template>
   <header class="wiki-header">
-    <router-link to="/"><h1>Widgets</h1></router-link>
+    <router-link to="/">
+      <h1>Widgets</h1>
+    </router-link>
+
+    <div v-if="isMenu">
+      <b class="mr-4">Current Restaurant:</b>
+      <select v-model="currentRestaurantID">
+        <option v-for="restaurant in userRestaurants" :key="restaurant.id" :value="restaurant.id">
+          {{ restaurant.name }}
+        </option>
+      </select>
+    </div>
+
     <nav>
       <ul>
         <li><button @click="logout">Logout</button></li>
@@ -11,16 +23,48 @@
 
 <script>
 import { getAuth, signOut } from "firebase/auth";
-
+import { useRoute, useRouter } from "vue-router";
+import { useRestaurantStore } from '@/stores/restaurantStore';
+import { useUserStore } from "@/stores/userStore";
+import { storeToRefs } from "pinia";
+import { computed } from "vue";
 export default {
   name: "Header",
-  methods: {
-    logout() {
+  setup() {
+    const route = useRoute();
+    const router = useRouter();
+    const userStore = useUserStore();
+
+    const restaurantStore = useRestaurantStore();
+    const {
+      userRestaurants,
+      currentRestaurantID,
+    } = storeToRefs(restaurantStore);
+    const {
+      currentUser,
+      isAdmin,
+    } = storeToRefs(userStore);
+
+
+    const logout = () => {
       const auth = getAuth();
       signOut(auth).then(() => {
-        this.$router.push("/login");
+        router.push("/login");
       });
-    },
+    };
+
+    const isMenu = computed(() => {
+      return route.path.includes("menu");
+    })
+
+    return {
+      route,
+      router,
+      logout,
+      isMenu,
+      userRestaurants,
+      currentRestaurantID,
+    };
   },
 };
 </script>

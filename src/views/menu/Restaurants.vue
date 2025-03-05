@@ -1,7 +1,12 @@
 <template>
   <div>
     <h1>Manage Restaurants</h1>
-    <button @click="openCreatePopup">Add Restaurant</button>
+    <nav>
+      <router-link to="/menu">Menu</router-link> |
+      <router-link to="/menu/orders">View Orders</router-link> |
+      <router-link to="/menu/create-order">Create Order</router-link>
+    </nav>
+    <button class="my-4" @click="openCreatePopup">Add Restaurant</button>
     
     <div class="restaurant-list">
       <div v-for="restaurant in restaurants" :key="restaurant.id" class="restaurant-card card" @click="openEditPopup(restaurant)">

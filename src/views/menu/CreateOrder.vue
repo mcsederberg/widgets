@@ -3,6 +3,9 @@
     <h2>Create Order</h2>
 
     <nav>
+      <template v-if="isAdmin">
+        <router-link to="/menu/restaurants">Restaurants</router-link> |
+      </template>
       <router-link to="/menu">Menu</router-link> |
       <router-link to="/menu/orders">View Orders</router-link>
     </nav>
@@ -10,11 +13,11 @@
     <input class="mt-4" v-model="customerName" placeholder="Customer Name" required />
 
     <ul>
-      <li v-for="item in menuItems" :key="item.id">
+      <li v-for="item in menuItems" :key="item.id" class="mb-4">
+        <button  @click="removeItem(item)">-</button>
+        <button class="mx-4 " @click="addItem(item)">+</button>
         {{ item.name }} - ${{ item.price.toFixed(2) }}
-        <button class="mx-4 " @click="removeItem(item)">-</button>
-        <button @click="addItem(item)">+</button>
-        <span v-if="orderItems[item.id]">x{{ orderItems[item.id].quantity }}</span>
+        <b class="ml-4">x{{ orderItems[item.id]?.quantity ? orderItems[item.id]?.quantity : 0 }}</b>
       </li>
     </ul>
 
@@ -31,11 +34,26 @@ import { ref, onMounted, computed } from 'vue';
 import { db } from '@/services/firebase';
 import { collection, addDoc, getDocs } from 'firebase/firestore';
 
+import { useUserStore } from "@/stores/userStore";
+import { useRestaurantStore } from '@/stores/restaurantStore';
+import { storeToRefs } from "pinia";
+
 export default {
   setup() {
     const customerName = ref('');
     const menuItems = ref([]);
     const orderItems = ref({});
+    const restaurantStore = useRestaurantStore();
+    const userStore = useUserStore();
+    const {
+      currentUser,
+      isAdmin,
+    } = storeToRefs(userStore);
+    const {
+      currentRestaurantMenuItems,
+      currentRestaurant,
+      currentRestaurantID,
+    } = storeToRefs(restaurantStore);
 
     const fetchMenuItems = async () => {
       const querySnapshot = await getDocs(collection(db, 'menuItems'));
@@ -68,6 +86,7 @@ export default {
         customer: customerName.value,
         items: itemsArray,
         date: new Date().toISOString(),
+        restaurantID: currentRestaurantID.value,
       });
 
       customerName.value = '';
@@ -76,7 +95,22 @@ export default {
 
     onMounted(fetchMenuItems);
 
-    return { customerName, menuItems, orderItems, addItem, removeItem, createOrder, totalPrice };
+    return {
+      customerName,
+      isAdmin,
+      menuItems,
+      orderItems,
+      addItem,
+      removeItem,
+      createOrder,
+      totalPrice
+    };
   }
 };
 </script>
+
+<style lang="scss" scoped>
+  li {
+    list-style-type: none;
+  }
+</style>

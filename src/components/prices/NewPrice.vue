@@ -34,13 +34,13 @@
         </label>
 
         <label>Category:
-          <select class="soloSelect" v-model="category" required>
+          <select class=" ml-auto soloSelect" v-model="category" required>
             <option v-for="cat in categories" :key="cat" :value="cat">{{ cat }}</option>
           </select>
         </label>
 
-        <button type="submit">Save</button>
-        <button type="button" @click="closePopup">Cancel</button>
+        <button class="btn-primary" type="submit">Save</button>
+        <button class="btn-secondary" type="button" @click="closePopup">Cancel</button>
       </form>
     </div>
   </div>
@@ -103,7 +103,7 @@ export default {
 };
 </script>
 
-<style>
+<style scoped>
 .popup-overlay {
   position: fixed;
   top: 0;
