@@ -3,7 +3,7 @@
     <h1>Manage Members</h1>
     <nav>
       <template v-if="isAdmin">
-        <router-link to="/membership/clubs">Clubs</router-link> 
+        <router-link to="/membership/clubs">Clubs</router-link>
         <!-- | -->
       </template>
       <!-- <router-link to="/membership">Membership</router-link>  -->
@@ -11,16 +11,29 @@
       <!-- <router-link to="/membership/">View Members</router-link> | -->
       <!-- <router-link to="/membership/create-order">Create Order</router-link> -->
     </nav>
-    <button class="my-4" @click="openCreatePopup">Add Member</button>
+    <div class="row">
+      <button class="my-4 mr-4" @click="openCreatePopup">Add Member</button>
+      <!-- active only / all toggle -->
+      <button @click="showAll = !showAll" class="btn-secondary">
+        {{ showAll ? 'Show Active Only' : 'Show All' }}
+      </button>
+    </div>
 
     <div class="member-list">
-      <div v-for="member in clubMembers" :key="member.id" class="member-card card" @click="openEditPopup(member)">
+    <div v-if="!currentClubID">
+      <h3>No club selected</h3>
+    </div>
+      <div v-for="member in filteredMembers" :key="member.id" class="member-card card" @click="openEditPopup(member)">
         <h3>{{ member.firstName }} {{ member.lastName }}</h3>
         <p>Join Date: {{ prettyDate(member.joinDate) }}</p>
+        <p>Has paid this month: {{ hasPaid(member) ? '✅' : '❌' }}</p>
+        <p>Belt: {{ member.belt }}</p>
         <div class="row">
           <!-- edit and delete buttons -->
-          <!-- <button @click="openEditPopup(member)" class="mr-4 btn-secondary">✏️</button> -->
-          <button @click="confirmDelete(member)" class="btn-secondary">🗑️</button>
+          <!-- <button @click.stop="openEditPopup(member)" class="mr-4 btn-secondary">✏️</button> -->
+          <button v-if="member.active" @click.stop="deactivate(member)" class="mr-4 btn-secondary">🔒</button>
+          <button v-else @click.stop="activate(member)" class="mr-4 btn-secondary"> 🔓 </button>
+          <button @click.stop="confirmDelete(member)" class="btn-secondary">🗑️</button>
         </div>
       </div>
     </div>
@@ -28,14 +41,16 @@
 
     <!-- View popup -->
     <div class="popupBackground" v-if="viewMemberID" @click="viewMemberID = null"></div>
-    <div v-if="viewMemberID" class="popup "  @click="viewMemberID = null">
+    <div v-if="viewMemberID" class="popup " @click="viewMemberID = null">
       <div class="popup-content popup-content-wide" @click.stop>
         <h3>Member Details</h3>
         <p><b>Name:</b> {{ viewMember.name }}</p>
         <p><b>Join Date:</b> {{ prettyDate(viewMember.joinDate) }}</p>
+        <p><b>Belt:</b> {{ viewMember.belt }} <button class="btn-secondary"
+            @click.stop="advanceBelt(viewMember)">Advance</button></p>
         <div class="align-center row">
           <b class="mr-4">Payments</b>
-          <button @click="newPayment">New</button>
+          <button @click.stop="newPayment">New</button>
         </div>
         <table>
           <thead>
@@ -131,6 +146,8 @@ export default {
     const saveMember = async (member) => {
       // add clubID to member
       member.clubID = member.clubID ? member.clubID : currentClubID.value;
+      member.belt = 'White';
+      member.active = true;
       if (member.id) {
         await updateDoc(doc(db, "members", member.id), member);
       } else {
@@ -223,12 +240,68 @@ export default {
       showPaymentPopup.value = true;
     }
 
+    const hasPaid = (member) => {
+      const thisMonth = new Date().toISOString().split('-').slice(0, 2).join('-');
+      return memberPayments.value.some(payment => payment.memberID === member.id && payment.date.startsWith(thisMonth));
+    }
+
+    const deactivate = async (member) => {
+      member.active = false;
+      await updateDoc(doc(db, "members", member.id), member);
+      membershipStore.getMembers();
+    }
+
+    const activate = async (member) => {
+      member.active = true;
+      await updateDoc(doc(db, "members", member.id), member);
+      membershipStore.getMembers();
+    }
+
+    const showAll = ref(false);
+
+    const filteredMembers = computed(() => {
+      return clubMembers.value.filter(member => showAll.value ? true : member.active);
+    });
+
+    const advanceBelt = async (member) => {
+      const belts = [
+        'White',
+        "Advanced White",
+        'Yellow',
+        "Advanced Yellow",
+        'Orange',
+        "Advanced Orange",
+        'Green',
+        'Advanced Green',
+        'Blue',
+        'Advanced Blue',
+        'Purple',
+        'Advanced Purple',
+        'Brown',
+        'Advanced Brown',
+        'Black'];
+      const currentBelt = member.belt;
+      const currentIndex = belts.indexOf(currentBelt);
+      if (currentIndex < belts.length - 1) {
+        member.belt = belts[currentIndex + 1];
+        await updateDoc(doc(db, "members", member.id), member);
+        membershipStore.getMembers();
+      }
+    }
+
     return {
+      showAll,
+      filteredMembers,
+      activate,
+      advanceBelt,
+      deactivate,
+      hasPaid,
       closePaymentPopup,
       closePopup,
       clubMembers,
       confirmDelete,
       currentMemberPayments,
+      currentClubID,
       deleteMember,
       deletingMember,
       deletingMemberId,

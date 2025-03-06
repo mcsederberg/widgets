@@ -28,7 +28,11 @@ export const useMembershipStore = defineStore({
       const user = useUserStore();
       const currentUser = user.currentUser;
       const userID = currentUser.uid;
-      return this.clubs.filter((club) => club.userIDs.includes(userID));
+      let clubs = this.clubs.filter((club) => club.userIDs.includes(userID));
+      if (!clubs.length) {
+        return this.clubs.find(c => c.name == 'EXAMPLE');
+      }
+      return clubs;
     },
     currentClub() {
       return this.clubs.find((club) => club.id === this.currentClubID);
