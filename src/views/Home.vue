@@ -23,6 +23,7 @@ export default {
       { id: 1, name: 'Recipes', url: '/recipes' },
       { id: 2, name: 'Prices', url: '/prices' },
       { id: 3, name: 'Restaurant', url: '/menu' },
+      { id: 4, name: 'Membership', url: '/membership' },
     ]);
     return {
       widgets,

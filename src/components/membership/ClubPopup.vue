@@ -1,15 +1,15 @@
 <template>
   <div class="popup">
     <div class="popup-content">
-      <h2>{{ restaurant.id ? 'Edit' : 'Create' }} Restaurant</h2>
+      <h2>{{ club.id ? 'Edit' : 'Create' }} Club</h2>
       <label>
         Name:
-        <input v-model="restaurant.name" type="text" />
+        <input v-model="club.name" type="text" />
       </label>
 
       <label>
         Owner:
-        <select v-model="restaurant.ownerID">
+        <select v-model="club.ownerID">
           <option v-for="user in users" :key="user.id" :value="user.id">
             {{ user.name }}
           </option>
@@ -24,7 +24,7 @@
               <input 
                 type="checkbox" 
                 :value="user.id" 
-                v-model="restaurant.userIDs" 
+                v-model="club.userIDs" 
               />
               {{ user.name }}
             </label>
@@ -34,7 +34,7 @@
 
       <div class="popup-actions">
         <button @click="$emit('close')">Cancel</button>
-        <button @click="saveRestaurant">Save</button>
+        <button @click="saveClub">Save</button>
       </div>
     </div>
   </div>
@@ -45,27 +45,53 @@ import { ref, watch } from "vue";
 
 export default {
   props: {
-    restaurant: Object,
+    club: Object,
     users: Array
   },
   emits: ["close", "save"],
   setup(props, { emit }) {
-    const restaurant = ref({ ...props.restaurant });
+    const club = ref({ ...props.club });
 
-    watch(() => props.restaurant, (newVal) => {
-      restaurant.value = { ...newVal };
+    watch(() => props.club, (newVal) => {
+      club.value = { ...newVal };
     });
 
-    const saveRestaurant = () => {
-      emit("save", restaurant.value);
+    const saveClub = () => {
+      emit("save", club.value);
     };
 
-    return { restaurant, saveRestaurant };
+    return { club, saveClub };
   }
 };
 </script>
 
 <style lang="scss" scoped>
+.popup {
+  position: fixed;
+   top: 0;
+  left: 0; 
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: white;
+}
+.popup-content {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  width: 300px;
+  color: rgba(0, 0, 0, 0.8);
+  display: flex;
+  flex-direction: column;
+}
+.popup-actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 10px;
+}
 select {
   margin-left: auto;
 }

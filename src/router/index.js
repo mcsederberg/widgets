@@ -17,6 +17,9 @@ import CreateOrder from "@/views/menu/CreateOrder.vue";
 import ListOrders from "@/views/menu/ListOrders.vue";
 import Restaurants from "@/views/menu/Restaurants.vue";
 
+import Membership from "@/views/membership/Membership.vue";
+import Clubs from "@/views/membership/Clubs.vue";
+
 const requireAuth = (to, from, next) => {
   const auth = getAuth();
   onAuthStateChanged(auth, (user) => {
@@ -98,6 +101,22 @@ const routes = [
       }
     ],
   },
+  {
+    path: '/membership',
+    beforeEnter: requireAuth,
+    children: [
+      {
+        path: "",
+        name: "Membership",
+        component: Membership,
+      },
+      {
+        path: 'clubs',
+        name: 'Clubs',
+        component: Clubs,
+      },
+    ]
+  }
 ];
 
 const router = createRouter({

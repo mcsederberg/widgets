@@ -12,6 +12,14 @@
         </option>
       </select>
     </div>
+    <div v-else-if="isMembership">
+      <b class="mr-4">Current Club:</b>
+      <select v-model="currentClubID">
+        <option v-for="club in userClubs" :key="club.id" :value="club.id">
+          {{ club.name }}
+        </option>
+      </select>
+    </div>
 
     <nav>
       <ul>
@@ -25,6 +33,7 @@
 import { getAuth, signOut } from "firebase/auth";
 import { useRoute, useRouter } from "vue-router";
 import { useRestaurantStore } from '@/stores/restaurantStore';
+import { useMembershipStore } from '@/stores/membershipStore';
 import { useUserStore } from "@/stores/userStore";
 import { storeToRefs } from "pinia";
 import { computed } from "vue";
@@ -45,6 +54,12 @@ export default {
       isAdmin,
     } = storeToRefs(userStore);
 
+    const membershipStore = useMembershipStore();
+    const {
+      userClubs,
+      currentClubID,
+    } = storeToRefs(membershipStore);
+
 
     const logout = () => {
       const auth = getAuth();
@@ -57,13 +72,20 @@ export default {
       return route.path.includes("menu");
     })
 
+    const isMembership = computed(() => {
+      return route.path.includes("membership");
+    })
+
     return {
+      currentClubID,
+      currentRestaurantID,
+      isMembership,
+      isMenu,
+      logout,
       route,
       router,
-      logout,
-      isMenu,
+      userClubs,
       userRestaurants,
-      currentRestaurantID,
     };
   },
 };
